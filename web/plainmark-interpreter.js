@@ -10,21 +10,40 @@ class PlainmarkInterpreter {
         this.errorCount = 0;
     }
 
-    /**
+
+        /**
      * Ekstrahuje bloki kodu Plainmark z tekstu Markdown
      * @param {string} markdownText - Tekst w formacie Markdown
-     * @returns {string} - Połączone bloki kodu Plainmark
+     * @returns {Array} - Tablica obiektów z blokami kodu i ich językami
      */
     extractCode(markdownText) {
-        const codeBlockRegex = /```plainmark\s*([\s\S]*?)\s*```/g;
-        let match;
-        let code = "";
+        const result = [];
 
-        while ((match = codeBlockRegex.exec(markdownText)) !== null) {
-            code += match[1] + "\n";
+        // Znajdź tradycyjne bloki ```plainmark
+        const plainmarkBlockRegex = /```plainmark\s*([\s\S]*?)\s*```/g;
+        let match;
+
+        while ((match = plainmarkBlockRegex.exec(markdownText)) !== null) {
+            result.push({
+                code: match[1],
+                language: 'plainmark',
+                originalMatch: match[0]
+            });
         }
 
-        return code;
+        // Znajdź bloki z podwójnym określeniem języka ```język plainmark
+        const multiLangBlockRegex = /```(\w+)\s+plainmark\s*([\s\S]*?)\s*```/g;
+
+        while ((match = multiLangBlockRegex.exec(markdownText)) !== null) {
+            result.push({
+                code: match[2],
+                language: match[1],
+                originalMatch: match[0],
+                multiLang: true
+            });
+        }
+
+        return result;
     }
 
     /**

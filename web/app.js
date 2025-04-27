@@ -24,7 +24,32 @@ const saveBtn = document.getElementById("saveBtn");
 const loadBtn = document.getElementById("loadBtn");
 const shareBtn = document.getElementById("shareBtn");
 const clearBtn = document.getElementById("clearBtn");
+const autorunBtn = document.getElementById("autorunBtn");
 const tabs = document.querySelectorAll(".tab");
+
+/**
+ * Wykonuje kod Markdown i aktualizuje podgląd w czasie rzeczywistym
+ */
+function executeAndRefresh() {
+    // Wykonaj kod i pokaż wynik
+    output.innerHTML = interpreter.execute(editor.value);
+
+    // Po wykonaniu kodu, oznacz wykonane bloki w podglądzie
+    if (document.querySelector('.tab.active').dataset.tab === 'preview') {
+        setTimeout(() => {
+            refreshPreview();
+        }, 100);
+    }
+}
+
+/**
+ * Odświeża podgląd Markdown z oznaczeniem wykonanych bloków kodu
+ */
+function refreshPreview() {
+    if (document.querySelector('.tab.active').dataset.tab === 'preview') {
+        output.innerHTML = interpreter.renderMarkdown(editor.value);
+    }
+}
 
 // Event listeners dla zakładek
 tabs.forEach(tab => {
@@ -41,15 +66,13 @@ tabs.forEach(tab => {
             editor.style.display = "none";
             output.style.display = "block";
             // Renderujemy markdown w outputie
-            output.innerHTML = interpreter.renderMarkdown(editor.value);
+            refreshPreview();
         }
     });
 });
 
 // Event listeners dla przycisków
-runBtn.addEventListener("click", () => {
-    output.innerHTML = interpreter.execute(editor.value);
-});
+runBtn.addEventListener("click", executeAndRefresh);
 
 saveBtn.addEventListener("click", () => {
     try {
@@ -98,6 +121,43 @@ document.getElementById("example1").addEventListener("click", loadBasicExample);
 document.getElementById("example2").addEventListener("click", loadDomExample);
 document.getElementById("example3").addEventListener("click", loadFileExample);
 document.getElementById("example4").addEventListener("click", loadVisualizationExample);
+
+// Dodaj przycisk do menu przykładów
+const examplesDropdown = document.querySelector('.dropdown-content');
+const multiLangExample = document.createElement('a');
+multiLangExample.href = '#';
+multiLangExample.id = 'example5';
+multiLangExample.textContent = 'Mieszane języki';
+examplesDropdown.appendChild(multiLangExample);
+
+// Dodaj obsługę nowego przykładu
+document.getElementById("example5").addEventListener("click", loadMultiLangExample);
+
+// Zmienna przechowująca stan auto-wykonania
+let autorunEnabled = false;
+
+// Event listener dla przycisku auto-uruchamiania
+autorunBtn.addEventListener("click", () => {
+    autorunEnabled = !autorunEnabled;
+    autorunBtn.textContent = autorunEnabled ? "Auto-wykonanie: Wł" : "Auto-wykonanie";
+    autorunBtn.style.backgroundColor = autorunEnabled ? "#f44336" : "#4CAF50";
+
+    if (autorunEnabled) {
+        // Wykonaj kod od razu po włączeniu
+        executeAndRefresh();
+    }
+});
+
+// Event listener do aktualizacji w czasie rzeczywistym
+editor.addEventListener("input", () => {
+    if (autorunEnabled) {
+        // Delay, aby nie wykonywać kodu przy każdym naciśnięciu klawisza
+        clearTimeout(editor.timeout);
+        editor.timeout = setTimeout(() => {
+            executeAndRefresh();
+        }, 1000); // Opóźnienie 1 sekundy
+    }
+});
 
 /**
  * Ładuje podstawowy przykład Plainmark
@@ -160,6 +220,22 @@ function loadVisualizationExample(e) {
         .catch(error => {
             console.error('Błąd wczytywania przykładu:', error);
             editor.value = getVisualizationExample();
+        });
+}
+
+/**
+ * Ładuje przykład mieszanych języków
+ */
+function loadMultiLangExample(e) {
+    e.preventDefault();
+    fetch('examples/multi-lang.md')
+        .then(response => response.text())
+        .then(content => {
+            editor.value = content;
+        })
+        .catch(error => {
+            console.error('Błąd wczytywania przykładu:', error);
+            editor.value = getMultiLangExample();
         });
 }
 
@@ -479,5 +555,102 @@ chartContainer.appendChild(xAxis);
 document.body.appendChild(mainContainer);
 
 print("Utworzono interaktywny wykres słupkowy z danymi miesięcznymi.");
+\`\`\``;
+}
+
+/**
+ * Zawartość przykładu mieszanych języków
+ */
+function getMultiLangExample() {
+    return `# Przykład mieszanych języków z Plainmark
+
+Ten przykład demonstruje, jak można używać Plainmark w połączeniu z innymi językami programowania. Bloki kodu z podwójnym określeniem języka (np. \`\`\`js plainmark) są interpretowane przez Plainmark, ale zachowują też informację o oryginalnym języku.
+
+## JavaScript + Plainmark
+
+\`\`\`js plainmark
+// To jest blok kodu JavaScript z Plainmark
+let message = "Hello from JavaScript!";
+console.log(message);
+
+// Tworzymy element DOM
+let jsBlock = document.createElement("div");
+jsBlock.style.backgroundColor = "#f0db4f"; // Kolor JavaScript
+jsBlock.style.padding = "10px";
+jsBlock.style.borderRadius = "5px";
+jsBlock.style.marginTop = "10px";
+jsBlock.style.color = "#323330";
+jsBlock.textContent = message;
+
+document.body.appendChild(jsBlock);
+\`\`\`
+
+## Python + Plainmark
+
+\`\`\`python plainmark
+# To jest blok kodu Python z Plainmark
+message = "Hello from Python!"
+print(message)
+
+# W przeglądarce nadal wykonuje się jako JavaScript
+# ale zachowujemy składnię Pythona dla czytelności
+def calculate_factorial(n):
+    if n <= 1:
+        return 1
+    return n * calculate_factorial(n - 1)
+
+factorial_5 = calculate_factorial(5)
+print(f"Silnia z 5 wynosi: {factorial_5}")
+
+# Tworzymy element DOM dla wyniku Pythona
+python_block = document.createElement("div")
+python_block.style.backgroundColor = "#306998"
+python_block.style.padding = "10px"
+python_block.style.borderRadius = "5px"
+python_block.style.marginTop = "10px"
+python_block.style.color = "white"
+python_block.textContent = "Python: " + message + ", 5! = " + factorial_5
+
+document.body.appendChild(python_block)
+\`\`\`
+
+## HTML + Plainmark
+
+\`\`\`html plainmark
+<!-- To jest blok kodu HTML z Plainmark -->
+<div id="html-container" style="margin-top: 10px; border: 1px solid #e34c26; border-radius: 5px; padding: 10px;">
+  <h3 style="color: #e34c26;">Element HTML</h3>
+  <p>Ten element został utworzony bezpośrednio w HTML.</p>
+</div>
+
+<script>
+  // Kod JavaScript osadzony w HTML, również jest wykonany
+  const element = document.getElementById('html-container');
+  element.addEventListener('click', function() {
+    print("Kliknięto element HTML!");
+    this.style.backgroundColor = "#ffe6e0";
+  });
+</script>
+\`\`\`
+
+## CSS + Plainmark
+
+\`\`\`css plainmark
+/* To jest blok kodu CSS z Plainmark */
+.plainmark-styled {
+  background-color: #264de4;
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+/* Możemy również wykonać kod JavaScript */
+let cssElement = document.createElement("div");
+cssElement.className = "plainmark-styled";
+cssElement.textContent = "Ten element został ostylowany przez CSS + Plainmark";
+document.body.appendChild(cssElement);
 \`\`\``;
 }

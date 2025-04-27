@@ -16,7 +16,11 @@ fi
 
 pip install -r requirements.txt
 
-#python version/project.py
+pip install -e .
+python version/init.py -f src/markdown2app/__init__.py
+python version/setup.py
+python version/src.py
+
 python changelog.py
 #python increment.py
 bash git.sh
