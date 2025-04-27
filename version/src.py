@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-A script to increment the version in __init__.py file using semantic versioning.
+A script to update version in Python package files.
+Supports different version declaration formats.
 """
 import re
 import argparse
@@ -8,38 +9,31 @@ import os
 import sys
 
 
-# Usage examples:
-# Default: increment patch version (0.1.8 → 0.1.9)
-# ./increment_init.py
-
-# Increment minor version (0.1.8 → 0.2.0)
-# ./increment_init.py -t minor
-
-# Increment major version (0.1.8 → 1.0.0)
-# ./increment_init.py -t major
-
-# Create a prerelease (0.1.8 → 0.1.8-alpha.1)
-# ./increment_init.py -t prealpha
-
-# Specify a custom file path
-# ./increment_init.py -f src/pifunc/__init__.py
-
-
 def get_version_from_file(file_path):
-    """Extract the current version from pyproject.toml file."""
+    """Extract the current version from a Python file."""
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
-            # Look for __version__ = "x.y.z" pattern
-            version_match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
-            if version_match:
-                return version_match.group(1)
+            # Try different version patterns
+            patterns = [
+                r'__version__\s*=\s*(?:version\s*=\s*)?[\'"]([^\'"]+)[\'"]',  # __version__ = version = "0.1.3"
+                r'__version__\s*=\s*[\'"]([^\'"]+)[\'"]',  # __version__ = "0.1.8"
+                r'version\s*=\s*[\'"]([^\'"]+)[\'"]'  # version = "0.1.3"
+            ]
+
+            for pattern in patterns:
+                version_match = re.search(pattern, content)
+                if version_match:
+                    return version_match.group(1), content
+
+            print(f"Warning: No version pattern found in {file_path}")
+            return None, content
     except FileNotFoundError:
         print(f"Error: {file_path} not found.")
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
 
-    return None
+    return None, None
 
 
 def increment_version(current_version, increment_type="patch"):
@@ -107,49 +101,62 @@ def increment_version(current_version, increment_type="patch"):
     return new_version
 
 
+def set_specific_version(new_version):
+    """Validate that a manually specified version follows semantic versioning."""
+    # Basic check for semantic versioning format
+    if not re.match(r'^\d+\.\d+\.\d+(-([a-zA-Z0-9.-]+))?(\+([a-zA-Z0-9.-]+))?$', new_version):
+        raise ValueError(f"Invalid version format: {new_version}. Expected format: X.Y.Z[-prerelease][+build]")
+    return new_version
 
 
-def update_version_in_init(file_path, increment_type="patch", backup=True):
+def update_version_in_file(file_path, new_version=None, increment_type="patch", backup=True):
     """
-    Update the version in __init__.py file.
+    Update the version in a Python file.
 
     Args:
-        file_path: Path to __init__.py file
-        increment_type: The part of the version to increment
+        file_path: Path to the file
+        new_version: Specific version to set (overrides increment_type if provided)
+        increment_type: The part of the version to increment if new_version is not specified
         backup: Whether to create a backup of the original file
 
     Returns:
         Tuple of (success boolean, message string, new version)
     """
     try:
-        # Get current version
-        current_version = get_version_from_file(file_path)
-        if not current_version:
+        # Get current version and content
+        current_version, content = get_version_from_file(file_path)
+        if not current_version or not content:
             return False, f"Could not find version in {file_path}", None
 
-        # Increment version
-        new_version = increment_version(current_version, increment_type)
-
-        # Read file content
-        with open(file_path, 'r') as file:
-            content = file.read()
+        # Determine new version
+        if new_version:
+            target_version = set_specific_version(new_version)
+        else:
+            target_version = increment_version(current_version, increment_type)
 
         # Create backup if requested
         if backup:
             backup_file = f"{file_path}.bak"
-            with open(backup_file, 'w') as file:
+            with open(backup_file, 'w', encoding='utf-8') as file:
                 file.write(content)
+            print(f"Backup created: {backup_file}")
 
-        # Replace version in file
-        pattern = r'(version\s*=\s*["\'])([^"\']+)(["\'])'
-        replacement = r'\g<1>' + new_version + r'\g<3>'
-        new_content = re.sub(pattern, replacement, content)
+        # Replace version in different formats
+        patterns = [
+            (r'(__version__\s*=\s*version\s*=\s*)[\'"]([^\'"]+)[\'"]', rf'\g<1>"{target_version}"'),
+            (r'(__version__\s*=\s*)[\'"]([^\'"]+)[\'"]', rf'\g<1>"{target_version}"'),
+            (r'(version\s*=\s*)[\'"]([^\'"]+)[\'"]', rf'\g<1>"{target_version}"')
+        ]
+
+        new_content = content
+        for pattern, replacement in patterns:
+            new_content = re.sub(pattern, replacement, new_content)
 
         # Write updated content back to file
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             file.write(new_content)
 
-        return True, f"Version in {os.path.basename(file_path)} updated from {current_version} to {new_version}", new_version
+        return True, f"Version in {os.path.basename(file_path)} updated from {current_version} to {target_version}", target_version
 
     except Exception as e:
         return False, f"Error updating version: {e}", None
@@ -157,18 +164,24 @@ def update_version_in_init(file_path, increment_type="patch", backup=True):
 
 def main():
     """Parse command line arguments and update version."""
-    parser = argparse.ArgumentParser(description="Increment version in __init__.py file")
+    parser = argparse.ArgumentParser(description="Update version in Python package files")
 
     parser.add_argument(
+        "-f", "--file",
+        required=True,
+        help="Path to the Python file containing version information"
+    )
+
+    version_group = parser.add_mutually_exclusive_group()
+    version_group.add_argument(
         "-t", "--type",
         choices=["major", "minor", "patch", "prealpha", "prebeta", "prerc"],
         default="patch",
         help="Version increment type (default: patch)"
     )
-
-    parser.add_argument(
-        "-f", "--file",
-        help="Path to __init__.py file (if not specified, will search recursively)"
+    version_group.add_argument(
+        "-v", "--version",
+        help="Set specific version (overrides --type)"
     )
 
     parser.add_argument(
@@ -179,41 +192,20 @@ def main():
 
     args = parser.parse_args()
 
-    file_name = "src/*/_version.py"
-    file_path = "./" + file_name
-    current_version = get_version_from_file(file_path)
-    updated_versions = []
-    all_success = True
+    success, message, new_version = update_version_in_file(
+        file_path=args.file,
+        new_version=args.version,
+        increment_type=args.type,
+        backup=not args.no_backup
+    )
 
-    # Update each file
-    if file_path:
-        success, message, new_version = update_version_in_init(
-            file_path=file_path,
-            increment_type=args.type,
-            backup=not args.no_backup
-        )
-
-        # Print result
-        if success:
-            print(f"✅ {message}")
-            updated_versions.append((file_path, new_version))
-        else:
-            print(f"❌ {message}")
-            all_success = False
-
-    # Summary if multiple files were updated
-    if len(updated_versions) > 1:
-        print("\nSummary of updates:")
-        for file_path, version in updated_versions:
-            print(f"  • {file_path}: {version}")
-
-    return 0 if all_success else 1
+    if success:
+        print(f"✅ {message}")
+        return 0
+    else:
+        print(f"❌ {message}")
+        return 1
 
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-# python increment_init.py -f src/pifunc/__init__.py
-# python increment_setup.py
-# python changelog.py
