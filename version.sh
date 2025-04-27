@@ -18,8 +18,9 @@ pip install -r requirements.txt
 
 pip install -e .
 python version/init.py -f src/markdown2app/__init__.py
-python version/setup.py
-python version/src.py
+python version/init.py -f src/markdown2app/_version.py
+#python version/setup.py
+#python version/src.py
 
 python changelog.py
 #python increment.py
