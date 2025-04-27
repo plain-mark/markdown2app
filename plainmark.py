@@ -44,7 +44,10 @@ class PlainmarkInterpreter:
             return f"Error: {e.stderr}"
 
     def execute_code(self, code: str) -> str:
-        """Execute plainmark code"""
+        """Execute plainmark code by converting JavaScript-like syntax to Python"""
+        # Clear output buffer
+        self.output_buffer = []
+
         # Create safe global context
         global_context = {
             'print': self.print,
@@ -62,16 +65,61 @@ class PlainmarkInterpreter:
             global_context[var_name] = var_value
 
         try:
-            # Process code to make it more Python-like
-            processed_code = code
-            # Replace JavaScript style declarations with Python
-            processed_code = re.sub(r'let\s+(\w+)\s*=\s*', r'\1 = ', processed_code)
-            processed_code = re.sub(r'const\s+(\w+)\s*=\s*', r'\1 = ', processed_code)
-            # Replace function declarations
-            processed_code = re.sub(r'function\s+(\w+)\s*\((.*?)\)\s*{', r'def \1(\2):', processed_code)
-            # Replace JavaScript-style braces with Python indentation (simplified)
-            processed_code = re.sub(r'\s*{\s*$', r':', processed_code)
-            processed_code = re.sub(r'\s*}\s*$', r'', processed_code)
+            # Skip JavaScript-style comments
+            lines = []
+            for line in code.split('\n'):
+                if line.strip().startswith('//'):
+                    # Convert JS comment to Python comment
+                    lines.append('# ' + line.strip()[2:])
+                elif line.strip().startswith(':::'):
+                    # Skip directive lines (they're not executable code)
+                    continue
+                elif '{' in line and '}' not in line:
+                    # Convert JS block start to Python colon and indentation
+                    lines.append(line.replace('{', ':'))
+                elif '}' in line and '{' not in line:
+                    # Skip JS block end (Python uses indentation)
+                    continue
+                elif 'import {' in line:
+                    # Skip JS-style imports
+                    continue
+                elif 'function ' in line and '(' in line:
+                    # Convert JS function declaration to Python def
+                    function_match = re.search(r'function\s+(\w+)\s*\((.*?)\)\s*{', line)
+                    if function_match:
+                        func_name, params = function_match.groups()
+                        lines.append(f"def {func_name}({params}):")
+                elif 'let ' in line or 'const ' in line:
+                    # Convert JS variable declarations to Python
+                    # Remove 'let' or 'const' and any trailing semicolons
+                    var_line = re.sub(r'(let|const)\s+', '', line)
+                    var_line = var_line.replace(';', '')
+                    # Handle common JS patterns
+                    var_line = var_line.replace('true', 'True')
+                    var_line = var_line.replace('false', 'False')
+                    var_line = var_line.replace('null', 'None')
+                    lines.append(var_line)
+                elif ';' in line:
+                    # Remove semicolons from regular lines
+                    lines.append(line.replace(';', ''))
+                else:
+                    lines.append(line)
+
+            # Join processed lines
+            processed_code = '\n'.join(lines)
+
+            # Convert if statements
+            processed_code = re.sub(r'if\s*\((.*?)\)\s*:', r'if \1:', processed_code)
+            processed_code = re.sub(r'else\s+if\s*\((.*?)\)\s*:', r'elif \1:', processed_code)
+
+            # Convert for loops
+            processed_code = re.sub(r'for\s*\(.*?;.*?;.*?\)\s*:',
+                                    lambda m: '# Skipped JS-style for loop: ' + m.group(0),
+                                    processed_code)
+
+            # Log the processed code for debugging
+            self.print("# DEBUG: Converted code to Python:")
+            self.print(processed_code)
 
             # Execute the processed code
             exec(processed_code, global_context)

@@ -3,6 +3,7 @@ pyproject.toml.bak
 .bak
 .log
 requirements.txt.backup
+testfile.txt
 # Byte-compiled / optimized / DL
 # Byte-compiled / optimized / DLL files
 __pycache__/

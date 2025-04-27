@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6] - 2025-04-27
+
+### Added
+- Changes in web/app.js
+- Changes in web/default-example.md
+- Changes in web/examples/basic.md
+- Changes in web/examples/dom.md
+- Changes in web/examples/files.md
+- Changes in web/examples/visualization.md
+- Changes in web/index.html
+- Changes in web/plainmark-interpreter.js
+- Changes in web/styles.css
+
 ## [0.1.5] - 2025-04-27
 
 ## [0.1.4] - 2025-04-27

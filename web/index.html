@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plainmark - Interpreter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Plainmark Interpreter</h1>
+        <div class="examples-dropdown">
+            <button>Przykłady ▼</button>
+            <div class="dropdown-content">
+                <a href="#" id="example1">Podstawowy przykład</a>
+                <a href="#" id="example2">Obsługa DOM</a>
+                <a href="#" id="example3">Obsługa plików</a>
+                <a href="#" id="example4">Wizualizacja danych</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="editor">Edytor</div>
+        <div class="tab" data-tab="preview">Podgląd Markdown</div>
+    </div>
+
+    <div class="toolbar">
+        <button id="runBtn">Uruchom (F5)</button>
+        <button id="saveBtn">Zapisz</button>
+        <button id="loadBtn">Wczytaj</button>
+        <button id="shareBtn">Udostępnij</button>
+        <button id="clearBtn">Wyczyść wyjście</button>
+    </div>
+
+    <textarea id="editor" placeholder="Napisz swój kod Plainmark tutaj..."></textarea>
+    <div id="output">// Wynik wykonania pojawi się tutaj...</div>
+
+    <script src="plainmark-interpreter.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

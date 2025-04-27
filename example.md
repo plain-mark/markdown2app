@@ -1,135 +1,94 @@
-# Plainmark Language Specification
+# Przykładowy program Plainmark
 
-Plainmark is a programming language embedded in Markdown that runs across multiple platforms.
-
-## Basic Syntax
-
-Plainmark code is written in Markdown code blocks with the `plainmark` language identifier:
+Ten program został specjalnie dostosowany, aby działać z interpreterem Pythona.
 
 ```plainmark
-// This is Plainmark code
-print("Hello World");
+# Definicja zmiennych
+name = "Python User"
+age = 30
+
+# Wypisanie powitania
+print(f"Witaj, {name}!")
+print(f"Masz {age} lat.")
+
+# Definicja funkcji
+def calculate_area(radius):
+    return 3.14159 * radius * radius
+
+# Użycie funkcji
+radius = 5
+area = calculate_area(radius)
+print(f"Powierzchnia koła o promieniu {radius} wynosi {area:.2f}")
+
+# Pobranie danych od użytkownika
+user_input = input("Podaj swój ulubiony kolor: ")
+print(f"Twój ulubiony kolor to: {user_input}")
+
+# Uruchomienie komendy systemowej (ograniczone do bezpiecznych poleceń)
+print("Pliki w bieżącym katalogu:")
+directory_contents = exec("ls -la")
+print(directory_contents)
 ```
 
-## Core Language Features
+## Instrukcje uruchomienia
 
-### Variables and Data Types
-```plainmark
-let name = "John";  // String
-let age = 30;       // Number
-let isActive = true; // Boolean
-let items = [1, 2, 3]; // Array
-let person = {name: "John", age: 30}; // Object
+Aby uruchomić ten program, wykonaj komendę:
+
+```
+python plainmark.py example.md
 ```
 
-### Control Flow
-```plainmark
-if (condition) {
-  // code block
-} else {
-  // else code
-}
+## Dodatkowe przykłady
 
-for (let i = 0; i < 10; i++) {
-  // loop code
-}
+Poniżej znajduje się bardziej zaawansowany przykład pokazujący instrukcje warunkowe:
 
-while (condition) {
-  // loop code
-}
+```plainmar
+# Instrukcje warunkowe w Plainmark (wersja Python)
+temperature = 22
+
+if temperature > 25:
+    print("Jest ciepło na zewnątrz!")
+elif temperature > 15:
+    print("Jest przyjemny dzień.")
+else:
+    print("Jest zimno.")
+
+# Prosta pętla (implementacja Pythonowa)
+print("Liczenie do 5:")
+for i in range(5):
+    print(f"Liczba: {i+1}")
+
+# Użycie listy (tablicy)
+fruits = ["Jabłko", "Banan", "Pomarańcza"]
+print("Pierwszy owoc:", fruits[0])
+print("Wszystkie owoce:")
+for fruit in fruits:
+    print(f"- {fruit}")
+
+# Obsługa wyjątków
+try:
+    result = 10 / 0
+    print("Ten kod nie zostanie wykonany")
+except Exception as e:
+    print(f"Złapano błąd: {e}")
 ```
 
-### Functions
-```plainmark
-function greet(name) {
-  return "Hello, " + name;
-}
+## Obsługa plików
 
-// Arrow functions
-const multiply = (a, b) => a * b;
+```plainmar
+# Obsługa plików
+filename = "testfile.txt"
+
+# Zapisanie do pliku
+with open(filename, "w") as f:
+    f.write("To jest testowy plik utworzony przez Plainmark.\n")
+    f.write("Możliwa jest prosta obsługa plików.\n")
+
+print(f"Zapisano dane do pliku {filename}")
+
+# Odczytanie z pliku
+print(f"Odczytanie zawartości pliku {filename}:")
+with open(filename, "r") as f:
+    content = f.read()
+    print(content)
 ```
-
-### Modules and Imports
-```plainmark
-import { functionName } from "./otherFile.md";
-export function publicFunction() { /* ... */ }
-```
-
-## Platform-Specific Features
-
-### Browser-Specific
-```plainmark
-// DOM manipulation
-document.querySelector("#myElement").innerHTML = "New content";
-
-// Event handling
-document.addEventListener("click", (e) => {
-  console.log("Clicked at", e.clientX, e.clientY);
-});
-```
-
-### Terminal/Python-Specific
-```plainmark
-// File system operations
-fs.writeFile("output.txt", "Content", (err) => {
-  if (err) print("Error writing file");
-});
-
-// Process handling
-exec("ls -la", (output) => print(output));
-```
-
-### Mobile-Specific
-```plainmark
-// Device sensors
-sensors.accelerometer.start((data) => {
-  print(`X: ${data.x}, Y: ${data.y}, Z: ${data.z}`);
-});
-
-// Camera access
-camera.takePicture((imagePath) => {
-  print("Image saved at: " + imagePath);
-});
-```
-
-## Special Markdown Integration
-
-Plainmark provides special directives for interactive documentation:
-
-### Interactive Examples
-```plainmark
-::: example
-let result = 5 + 10;
-print(result);
-:::
-```
-
-### Data Visualization
-```plainmark
-::: chart
-type: "bar",
-data: [1, 5, 3, 7, 4]
-:::
-```
-
-### UI Components
-```plainmark
-::: component Button
-props: {
-  text: "Click me",
-  onClick: () => alert("Clicked!")
-}
-:::
-```
-
-## Standard Library
-
-Plainmark includes a comprehensive standard library accessible across all platforms:
-
-- `String` - String manipulation functions
-- `Math` - Mathematical operations
-- `Array` - Array methods
-- `Object` - Object manipulation
-- `Network` - HTTP requests
-- `Storage` - Data persistence
-- `Console` - Logging and debugging
