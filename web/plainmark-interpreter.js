@@ -70,6 +70,7 @@ class PlainmarkInterpreter {
         return null;
     }
 
+
     /**
      * Wykonuje kod Plainmark
      * @param {string} markdownText - Tekst w formacie Markdown z blokami kodu Plainmark
@@ -158,8 +159,23 @@ class PlainmarkInterpreter {
 
                 this.print(`--- Wykonanie bloku kodu ${block.multiLang ? block.language + '+plainmark' : 'plainmark'} ---`);
 
+                // Konwersja komentarzy Pythona na komentarze JavaScript
+                let processedCode = block.code;
+
+                // Jeśli to blok Pythona, zamień komentarze # na //
+                if (block.language === 'python') {
+                    // Zamiana komentarzy linii rozpoczynających się od #
+                    processedCode = processedCode.replace(/^(\s*)#\s*(.*)/gm, '$1// $2');
+
+                    // Zamiana komentarzy w środku linii (bardziej skomplikowane, może wymagać dalszych ulepszeń)
+                    processedCode = processedCode.replace(/([^"'])#\s*(.*)/g, '$1// $2');
+
+                    this.print("// Kod po konwersji komentarzy:");
+                    this.print("// " + processedCode.replace(/\n/g, '\n// '));
+                }
+
                 // Przetworzenie kodu
-                let processedCode = block.code
+                processedCode = processedCode
                     .replace(/let\s+(\w+)\s*=\s*/g, "sandbox.$1 = ")
                     .replace(/const\s+(\w+)\s*=\s*/g, "sandbox.$1 = ")
                     .replace(/function\s+(\w+)\s*\(/g, "sandbox.$1 = function(");
@@ -197,6 +213,7 @@ class PlainmarkInterpreter {
             return `<span class="error">Błąd kompilacji: ${error.message}</span>`;
         }
     }
+
 
     /**
      * Renderuje tekst Markdown do HTML

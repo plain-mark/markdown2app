@@ -1,0 +1,49 @@
+{
+  "examples": [
+    {
+      "file": "default-example.md",
+      "title": "Przykład domyślny",
+      "description": "Prosty przykład pokazujący podstawy Plainmark"
+    },
+    {
+      "file": "basic.md",
+      "title": "Podstawowe elementy",
+      "description": "Zmienne, tablice, obiekty i pętle w Plainmark"
+    },
+    {
+      "file": "dom.md",
+      "title": "Manipulacja DOM",
+      "description": "Tworzenie i modyfikowanie elementów HTML"
+    },
+    {
+      "file": "files.md",
+      "title": "Operacje na plikach",
+      "description": "Symulacja operacji na plikach w Plainmark"
+    },
+    {
+      "file": "visualization.md",
+      "title": "Wizualizacja danych",
+      "description": "Tworzenie wykresów i wizualizacji w Plainmark"
+    },
+    {
+      "file": "multi-lang.md",
+      "title": "Mieszane języki",
+      "description": "Łączenie różnych języków programowania w Plainmark"
+    },
+    {
+      "file": "factorial-debug.md",
+      "title": "Debugowanie silni",
+      "description": "Przykład do testowania funkcji silni"
+    },
+    {
+      "file": "number-display-test.md",
+      "title": "Wyświetlanie liczb",
+      "description": "Testowanie różnych sposobów wyświetlania liczb"
+    },
+    {
+      "file": "minimal-python-factorial.md",
+      "title": "Minimalna silnia Python",
+      "description": "Prosty przykład funkcji silni w Python"
+    }
+  ]
+}

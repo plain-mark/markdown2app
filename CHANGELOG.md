@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.10] - 2025-04-27
+
+### Added
+- Changes in service/start.sh
+- Changes in service/stop.sh
+- Changes in web/examples/factorial-debug.md
+- Changes in web/examples/index.json
+- Changes in web/examples/minimal-python-factorial.md
+- Changes in web/examples/number-display-test.md
+- Changes in web/examples/python-example-with-js-comments.md
+
 ## [0.1.9] - 2025-04-27
 
 ### Added
