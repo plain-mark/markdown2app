@@ -1,8 +1,8 @@
 genexecutable:
-	cp main.py movatalk
-	sed  -i '1i #!/usr/bin/python\n' movatalk
+	cp main.py markdown2app
+	sed  -i '1i #!/usr/bin/python\n' markdown2app
 
 install: genexecutable
-	sudo cp movatalk /usr/bin/
-	sudo chmod +x /usr/bin/movatalk
-	rm movatalk
+	sudo cp markdown2app /usr/bin/
+	sudo chmod +x /usr/bin/markdown2app
+	rm markdown2app

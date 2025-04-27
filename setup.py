@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Installation of the movatalk package.
+Installation of the markdown2app package.
 """
 
 import os
@@ -17,28 +17,28 @@ except FileNotFoundError:
 
 # Configuration setup
 setup(
-    name="movatalk",
+    name="markdown2app",
     version="0.1.44",
-    description="libs for cameramonit, ocr, fin-officer, cfo, and other projects",
+    description="libs to run markdown as an app in a python3 environment",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     author="Tom Sapletta",
     author_email="tom@sapletta.com",
-    maintainer="movatalk developers",
+    maintainer="markdown2app developers",
     maintainer_email="info@softreck.dev",
     python_requires=">=3.7",
-    url="https://www.movatalk.com",
+    url="https://markdown2app.plainmark.com",
     project_urls={
-        "Repository": "https://github.com/movatalk/python",
-        "Changelog": "https://github.com/movatalk/python/releases",
-        "Wiki": "https://github.com/movatalk/python/wiki",
-        "Issue Tracker": "https://github.com/movatalk/python/issues/new",
+        "Repository": "https://github.com/plain-mark/markdown2app",
+        "Changelog": "https://github.com/plain-mark/markdown2app/releases",
+        "Wiki": "https://github.com/plain-mark/markdown2app/wiki",
+        "Issue Tracker": "https://github.com/plain-mark/markdown2app/issues/new",
     },
-    packages=["movatalk", "movatalk.config"],
+    packages=["markdown2app", "markdown2app.config"],
     package_dir={"": "src"},
     license="Apache-2.0",  # Use simple string format
     license_files=("LICENSE"),  # Empty tuple to explicitly prevent license files
-    keywords=["python", "movatalk", "movatalk", "movatalk3", "movatalk"],
+    keywords=["python", "markdown2app", "markdown2app", "markdown2app3", "markdown2app"],
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',

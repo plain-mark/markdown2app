@@ -1,6 +1,6 @@
-# Współpraca nad projektem movatalk
+# Współpraca nad projektem markdown2app
 
-Dziękujemy za zainteresowanie projektem movatalk! Poniżej znajdziesz informacje, jak możesz przyczynić się do rozwoju biblioteki.
+Dziękujemy za zainteresowanie projektem markdown2app! Poniżej znajdziesz informacje, jak możesz przyczynić się do rozwoju biblioteki.
 
 ## Sposób współpracy
 
@@ -78,7 +78,7 @@ pip install black flake8 isort pytest pytest-cov
 
 ## Wytyczne etyczne
 
-Projekt movatalk koncentruje się na tworzeniu bezpiecznych narzędzi dla dzieci. Prosimy o przestrzeganie następujących zasad:
+Projekt markdown2app koncentruje się na tworzeniu bezpiecznych narzędzi dla dzieci. Prosimy o przestrzeganie następujących zasad:
 
 1. Priorytetem jest bezpieczeństwo i prywatność dzieci
 2. Kod nie powinien zbierać niepotrzebnych danych
@@ -92,4 +92,4 @@ Wnosząc wkład do projektu, zgadzasz się na udostępnienie swoich zmian na lic
 ## Kontakt
 
 W razie pytań, skontaktuj się z nami.
-Dziękujemy za Twój wkład w projekt movatalk!
+Dziękujemy za Twój wkład w projekt markdown2app!
