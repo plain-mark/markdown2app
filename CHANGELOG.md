@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.13] - 2025-04-27
+
+### Added
+- Changes in .flatedit
+- Changes in docs/INSTALL.md
+- Changes in docs/README.md
+- Changes in flatedit.txt
+
 ## [0.1.12] - 2025-04-27
 
 ### Added
