@@ -7,6 +7,6 @@ aplikacji głosowych AI dla dzieci, z kontrolą rodzicielską
 i przetwarzaniem lokalnym.
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __author__ = "Tom Sapletta"
 __email__ = "info@softreck.dev"
