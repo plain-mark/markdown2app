@@ -2,8 +2,12 @@
 # Usuń poprzednie pliki
 
 echo "Starting publication process..."
+flatedit
+
 python -m venv venv
 source venv/bin/activate
+
+
 # Upewnij się że mamy najnowsze narzędzia
 pip install --upgrade pip build twine
 
