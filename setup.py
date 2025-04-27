@@ -18,7 +18,7 @@ except FileNotFoundError:
 # Configuration setup
 setup(
     name="markdown2app",
-    version="0.1.44",
+    version="0.1.1",
     description="libs to run markdown as an app in a python3 environment",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
