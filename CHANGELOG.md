@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.14] - 2025-04-27
+
+### Removed
+- Changes in version/init.py
+
 ## [0.1.13] - 2025-04-27
 
 ### Added

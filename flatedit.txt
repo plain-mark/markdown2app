@@ -1,5 +1,5 @@
-docs/INSTALL.md
 docs/README.md
+docs/INSTALL.md
 docs/examples/basic.md
 docs/examples/default-example.md
 docs/examples/dom.md
