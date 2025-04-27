@@ -7,199 +7,239 @@ __main__.py
 Moduł uruchamiający dla movatalk.
 Pozwala na uruchomienie movatalk jako aplikacji z linii poleceń.
 """
+#!/usr/bin/env python3
 
-import argparse
-import os
+import re
 import sys
-import time
+import os
 import json
-import signal
-
-from movatalk.audio import AudioProcessor, WhisperSTT, PiperTTS
-from movatalk.api import SafeAPIConnector
-from movatalk.hardware import HardwareInterface, PowerManager
-from movatalk.safety import ParentalControl
-from movatalk.utils import ConfigManager
+import subprocess
+import traceback
+from typing import Dict, List, Any, Optional, Union
 
 
-class VoiceAIAssistant:
-    """Główna klasa asystenta głosowego dla movatalk."""
+class PlainmarkInterpreter:
+    """Interpreter for the Plainmark language"""
 
-    def __init__(self, config_path=None):
-        """Inicjalizacja asystenta głosowego."""
-        print("Inicjalizacja movatalk...")
+    def __init__(self):
+        self.variables: Dict[str, Any] = {}
+        self.functions: Dict[str, callable] = {}
+        self.output_buffer: List[str] = []
 
-        # Wczytanie konfiguracji
-        self.config_manager = ConfigManager(config_path)
-        self.system_config = self.config_manager.get_system_config()
+    def extract_code_blocks(self, markdown_text: str) -> List[str]:
+        """Extract plainmark code blocks from markdown text"""
+        pattern = r"```plainmark\s*([\s\S]*?)\s*```"
+        matches = re.findall(pattern, markdown_text)
+        return matches
 
-        # Inicjalizacja komponentów
-        self.audio = AudioProcessor(**self.system_config["audio"])
-        self.stt = WhisperSTT(**self.system_config["stt"])
-        self.tts = PiperTTS(**self.system_config["tts"])
-        self.api = SafeAPIConnector()
-        self.parental = ParentalControl()
+    def print(self, *args, **kwargs):
+        """Custom print function that captures output"""
+        output = " ".join(str(arg) for arg in args)
+        self.output_buffer.append(output)
+        print(output, **kwargs)
 
-        # Opcjonalna inicjalizacja komponentów sprzętowych
-        if self.system_config.get("use_hardware_interface", True):
-            self.hardware = HardwareInterface(**self.system_config["hardware"])
-            self.hardware.set_record_callback(self.process_interaction)
-            self.hardware.start_monitoring()
-        else:
-            self.hardware = None
+    def read_file(self, filename: str) -> str:
+        """Read a markdown file"""
+        with open(filename, 'r', encoding='utf-8') as file:
+            return file.read()
 
-        if self.system_config.get("use_power_manager", True):
-            self.power = PowerManager()
-            self.power.start_monitoring()
-        else:
-            self.power = None
+    def exec_terminal_command(self, command: str) -> str:
+        """Execute a terminal command and return its output"""
+        try:
+            result = subprocess.run(command, shell=True, check=True,
+                                    text=True, capture_output=True)
+            return result.stdout
+        except subprocess.CalledProcessError as e:
+            return f"Error: {e.stderr}"
 
-        # Stan aplikacji
-        self.running = True
-        self.conversation_context = []
+    def execute_code(self, code: str) -> str:
+        """Execute plainmark code"""
+        # Create safe global context
+        global_context = {
+            'print': self.print,
+            'input': input,
+            'open': open,
+            'os': os,
+            'json': json,
+            'exec': self.exec_terminal_command,
+            'vars': self.variables,
+            '__builtins__': __builtins__
+        }
 
-        # Rejestracja obsługi sygnałów
-        signal.signal(signal.SIGINT, self.signal_handler)
-        signal.signal(signal.SIGTERM, self.signal_handler)
-
-        print("System gotowy!")
-        self.tts.speak("Witaj! Jestem gotowy do rozmowy.")
-
-    def signal_handler(self, sig, frame):
-        """Obsługa sygnałów wyjścia."""
-        print("Otrzymano sygnał zatrzymania. Zamykanie aplikacji...")
-        self.running = False
-        self.tts.speak("Do widzenia!")
-        if self.hardware:
-            self.hardware.cleanup()
-        sys.exit(0)
-
-    def process_interaction(self):
-        """Przetwórz pojedynczą interakcję głosową."""
-        # Sprawdź ograniczenia rodzicielskie
-        if not self.parental.check_time_restrictions():
-            self.tts.speak("Przepraszam, ale teraz jest czas odpoczynku. Porozmawiajmy później.")
-            return False
-
-        if not self.parental.check_usage_limit():
-            self.tts.speak("Osiągnąłeś dzienny limit korzystania z urządzenia. Do zobaczenia jutro!")
-            return False
+        # Add existing variables to context
+        for var_name, var_value in self.variables.items():
+            global_context[var_name] = var_value
 
         try:
-            # Powiadom o gotowości do słuchania
-            if self.hardware:
-                self.hardware.set_recording_led(True)
-            self.tts.speak("Słucham cię.")
+            # Process code to make it more Python-like
+            processed_code = code
+            # Replace JavaScript style declarations with Python
+            processed_code = re.sub(r'let\s+(\w+)\s*=\s*', r'\1 = ', processed_code)
+            processed_code = re.sub(r'const\s+(\w+)\s*=\s*', r'\1 = ', processed_code)
+            # Replace function declarations
+            processed_code = re.sub(r'function\s+(\w+)\s*\((.*?)\)\s*{', r'def \1(\2):', processed_code)
+            # Replace JavaScript-style braces with Python indentation (simplified)
+            processed_code = re.sub(r'\s*{\s*$', r':', processed_code)
+            processed_code = re.sub(r'\s*}\s*$', r'', processed_code)
 
-            # Nagrywanie i przetwarzanie dźwięku
-            audio_file = self.audio.start_recording()
-            if self.hardware:
-                self.hardware.set_recording_led(False)
-                self.hardware.set_thinking_led(True)
+            # Execute the processed code
+            exec(processed_code, global_context)
 
-            if not audio_file:
-                print("Błąd nagrywania dźwięku")
-                return False
+            # Update variables
+            for var_name, var_value in global_context.items():
+                if var_name not in ['print', 'input', 'open', 'os', 'json', 'exec', 'vars', '__builtins__']:
+                    self.variables[var_name] = var_value
 
-            # Transkrypcja
-            print("Transkrypcja mowy...")
-            transcript = self.stt.transcribe(audio_file)
-            if "Błąd" in transcript:
-                print(transcript)
-                self.tts.speak("Przepraszam, nie zrozumiałem. Czy możesz powtórzyć?")
-                if self.hardware:
-                    self.hardware.set_thinking_led(False)
-                return False
-
-            print(f"Rozpoznany tekst: {transcript}")
-
-            # Filtrowanie treści wejściowej
-            filtered_input, filter_message = self.parental.filter_input(transcript)
-            if not filtered_input:
-                print(f"Treść odfiltrowana: {filter_message}")
-                self.tts.speak(filter_message)
-                if self.hardware:
-                    self.hardware.set_thinking_led(False)
-                return False
-
-            # Sprawdzenie stanu energii
-            if self.power and self.power.get_status()['critical_power']:
-                self.tts.speak("Niski poziom baterii. Proszę o podłączenie ładowarki.")
-                if self.hardware:
-                    self.hardware.set_thinking_led(False)
-                return False
-
-            # Aktualizacja statystyk użycia
-            self.parental.update_usage(minutes=1)
-
-            # Zapisanie kontekstu rozmowy (ostatnie 10 interakcji)
-            self.conversation_context.append({"role": "user", "content": filtered_input})
-            if len(self.conversation_context) > 10:
-                self.conversation_context = self.conversation_context[-10:]
-
-            # Zapytanie do API
-            context_text = " ".join([item["content"] for item in self.conversation_context])
-            response = self.api.query_llm(filtered_input, context=context_text)
-
-            # Filtrowanie odpowiedzi
-            filtered_response = self.parental.filter_output(response)
-            print(f"Odpowiedź: {filtered_response}")
-
-            # Zapisanie odpowiedzi do kontekstu
-            self.conversation_context.append({"role": "assistant", "content": filtered_response})
-
-            # Wyłączenie diody myślenia
-            if self.hardware:
-                self.hardware.set_thinking_led(False)
-
-            # Synteza mowy
-            self.tts.speak(filtered_response)
-            return True
+            return "\n".join(self.output_buffer)
 
         except Exception as e:
-            print(f"Błąd podczas interakcji: {str(e)}")
-            if self.hardware:
-                self.hardware.set_thinking_led(False)
-            self.tts.speak("Przepraszam, wystąpił błąd. Spróbujmy jeszcze raz.")
-            return False
+            error_msg = f"Error: {str(e)}\n{traceback.format_exc()}"
+            return error_msg
 
-    def run(self):
-        """Uruchom główną pętlę asystenta."""
-        print("Uruchomienie movatalk")
+    def execute_file(self, filename: str) -> str:
+        """Execute a plainmark file"""
+        try:
+            markdown_text = self.read_file(filename)
+            return self.execute_markdown(markdown_text)
+        except FileNotFoundError:
+            return f"Error: File '{filename}' not found."
+        except Exception as e:
+            return f"Error: {str(e)}"
 
-        if not self.hardware:
-            print("Tryb konsolowy: Naciśnij Enter, aby rozpocząć interakcję lub 'q', aby wyjść.")
+    def execute_markdown(self, markdown_text: str) -> str:
+        """Execute plainmark code blocks in markdown text"""
+        self.output_buffer = []
+        code_blocks = self.extract_code_blocks(markdown_text)
 
-        while self.running:
-            if not self.hardware:
-                # Tryb konsolowy (bez interfejsu sprzętowego)
-                try:
-                    user_input = input("> ")
-                    if user_input.lower() == 'q':
-                        self.running = False
-                        break
-                    self.process_interaction()
-                except EOFError:
-                    break
-            else:
-                # Tryb sprzętowy - interakcje są obsługiwane przez callbacki przycisków
-                time.sleep(1)
+        if not code_blocks:
+            return "No plainmark code blocks found in the file."
 
-                # Sprawdzenie stanu baterii (co 5 minut)
-                if self.power and int(time.time()) % 300 == 0:
-                    power_status = self.power.get_status()
-                    if power_status['battery_level'] < 15 and not power_status['is_charging']:
-                        self.hardware.blink_led(self.hardware.LED_POWER, duration=3, interval=0.1)
+        results = []
+        for block in code_blocks:
+            result = self.execute_code(block)
+            if result:
+                results.append(result)
 
-        print("movatalk zakończył pracę.")
+        return "\n".join(results)
+
+
+def create_example_file():
+    """Create an example plainmark file"""
+    example_content = """# Example Plainmark Program
+
+This is a simple demonstration of Plainmark running in Python.
+
+```plainmark
+# Define variables
+name = "Python User"
+age = 30
+
+# Print a greeting
+print(f"Hello, {name}!")
+print(f"You are {age} years old.")
+
+# Define a function
+def calculate_area(radius):
+    return 3.14159 * radius * radius
+
+# Use the function
+radius = 5
+area = calculate_area(radius)
+print(f"The area of a circle with radius {radius} is {area:.2f}")
+
+# Get user input
+user_input = input("Enter your favorite color: ")
+print(f"Your favorite color is {user_input}")
+
+# Run a system command (limited to safe commands)
+print("Files in current directory:")
+directory_contents = exec("ls -la")
+print(directory_contents)
+```
+
+This was a demonstration of Plainmark's basic features.
+"""
+
+    with open("example.md", "w") as f:
+        f.write(example_content)
+    print(f"Created example file: example.md")
+
+
+def print_help():
+    """Print help information"""
+    print("Plainmark Interpreter")
+    print("Usage:")
+    print("  plainmark.py [options] [file]")
+    print("\nOptions:")
+    print("  --help      Show this help message")
+    print("  --example   Create an example file")
+    print("  --repl      Start interactive REPL mode")
+    print("\nExamples:")
+    print("  plainmark.py example.md       Run a plainmark file")
+    print("  plainmark.py --example        Create an example file")
+    print("  plainmark.py --repl           Start REPL mode")
+
+
+def start_repl():
+    """Start interactive REPL mode"""
+    interpreter = PlainmarkInterpreter()
+    print("Plainmark REPL (Interactive Mode)")
+    print("Type 'exit' to quit, 'help' for help")
+
+    current_markdown = []
+
+    while True:
+        try:
+            line = input(">>> ")
+            if line.lower() == "exit":
+                break
+            elif line.lower() == "help":
+                print("Commands:")
+                print("  exit          Exit REPL")
+                print("  help          Show this help")
+                print("  run           Execute current markdown")
+                print("  clear         Clear current markdown")
+                print("  show          Show current markdown")
+                continue
+            elif line.lower() == "run":
+                result = interpreter.execute_markdown("\n".join(current_markdown))
+                print("\nResult:")
+                print(result)
+                continue
+            elif line.lower() == "clear":
+                current_markdown = []
+                print("Markdown cleared")
+                continue
+            elif line.lower() == "show":
+                print("\nCurrent Markdown:")
+                print("\n".join(current_markdown))
+                continue
+
+            current_markdown.append(line)
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            break
+        except Exception as e:
+            print(f"Error: {str(e)}")
 
 
 def main():
-    """Funkcja główna uruchamiana z linii poleceń."""
-    parser = argparse.ArgumentParser(description="movatalk - Bezpieczny interfejs głosowy AI dla dzieci")
-    parser.add_argument("--config", help="Ścieżka do pliku konfiguracyjnego")
-    parser.add_argument("--console", action="store_true",
-                        help="Uruchom w trybie konsolowym (bez interfejsu sprzętowego)")
-    args = parser.parse_args()
+    """Main function"""
+    if len(sys.argv) < 2:
+        print_help()
+        return
 
-    # Nadpisanie konfiguracji jeśli wybrany tryb
+    if sys.argv[1] == "--help":
+        print_help()
+    elif sys.argv[1] == "--example":
+        create_example_file()
+    elif sys.argv[1] == "--repl":
+        start_repl()
+    else:
+        interpreter = PlainmarkInterpreter()
+        result = interpreter.execute_file(sys.argv[1])
+        print(result)
+
+
+if __name__ == "__main__":
+    main()
