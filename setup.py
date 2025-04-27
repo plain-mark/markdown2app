@@ -15,10 +15,15 @@ try:
 except FileNotFoundError:
     LONG_DESCRIPTION = ''
 
+# Get version from _version.py
+version = {}
+with open("src/markdown2app/_version.py") as f:
+    exec(f.read(), version)
+
 # Configuration setup
 setup(
     name="markdown2app",
-    version="0.1.1",
+    version=version["__version__"],
     description="libs to run markdown as an app in a python3 environment",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -34,11 +39,11 @@ setup(
         "Wiki": "https://github.com/plain-mark/markdown2app/wiki",
         "Issue Tracker": "https://github.com/plain-mark/markdown2app/issues/new",
     },
-    packages=["markdown2app", "markdown2app.config"],
+    packages=find_packages(where="src"),
     package_dir={"": "src"},
-    license="Apache-2.0",  # Use simple string format
-    license_files=("LICENSE"),  # Empty tuple to explicitly prevent license files
-    keywords=["python", "markdown2app", "markdown2app", "markdown2app3", "markdown2app"],
+    license="Apache-2.0",
+    license_files=("LICENSE",),
+    keywords=["python", "markdown2app", "markdown", "app", "plainmark"],
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
@@ -49,6 +54,4 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
     ],
-    # Critical fix for the license-file issue:
-    # This prevents setuptools from automatically adding a license-file entry
 )
