@@ -3,18 +3,6 @@
  * Inicjalizuje interpreter i obsługuje interakcje z interfejsem użytkownika
  */
 
-// Wczytaj domyślną zawartość edytora z pliku Markdown
-fetch('default-example.md')
-    .then(response => response.text())
-    .then(content => {
-        document.getElementById('editor').value = content;
-    })
-    .catch(error => {
-        console.error('Błąd wczytywania przykładu:', error);
-        // Wczytaj przykładowy kod wbudowany
-        document.getElementById('editor').value = getDefaultExample();
-    });
-
 // Inicjalizacja interpretera
 const interpreter = new PlainmarkInterpreter();
 const editor = document.getElementById("editor");
@@ -26,6 +14,33 @@ const shareBtn = document.getElementById("shareBtn");
 const clearBtn = document.getElementById("clearBtn");
 const autorunBtn = document.getElementById("autorunBtn");
 const tabs = document.querySelectorAll(".tab");
+
+/**
+ * Pomocnicza funkcja do ładowania plików przykładów z katalogu examples
+ * @param {string} filename - Nazwa pliku bez ścieżki
+ * @param {Function} fallbackFunc - Funkcja do wywołania w przypadku błędu
+ * @returns {Promise} - Promise z zawartością pliku
+ */
+function loadExampleFile(filename, fallbackFunc) {
+    return fetch(`examples/${filename}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Nie udało się pobrać pliku ${filename}`);
+            }
+            return response.text();
+        })
+        .then(content => {
+            editor.value = content;
+            return content;
+        })
+        .catch(error => {
+            console.error(`Błąd wczytywania ${filename}:`, error);
+            if (typeof fallbackFunc === 'function') {
+                editor.value = fallbackFunc();
+            }
+            return null;
+        });
+}
 
 /**
  * Wykonuje kod Markdown i aktualizuje podgląd w czasie rzeczywistym
@@ -116,6 +131,32 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
+// Funkcje ładowania przykładów
+function loadBasicExample(e) {
+    e && e.preventDefault();
+    loadExampleFile('basic.md', getBasicExample);
+}
+
+function loadDomExample(e) {
+    e && e.preventDefault();
+    loadExampleFile('dom.md', getDomExample);
+}
+
+function loadFileExample(e) {
+    e && e.preventDefault();
+    loadExampleFile('files.md', getFileExample);
+}
+
+function loadVisualizationExample(e) {
+    e && e.preventDefault();
+    loadExampleFile('visualization.md', getVisualizationExample);
+}
+
+function loadMultiLangExample(e) {
+    e && e.preventDefault();
+    loadExampleFile('multi-lang.md', getMultiLangExample);
+}
+
 // Obsługa przykładów
 document.getElementById("example1").addEventListener("click", loadBasicExample);
 document.getElementById("example2").addEventListener("click", loadDomExample);
@@ -159,85 +200,10 @@ editor.addEventListener("input", () => {
     }
 });
 
-/**
- * Ładuje podstawowy przykład Plainmark
- */
-function loadBasicExample(e) {
-    e.preventDefault();
-    fetch('examples/basic.md')
-        .then(response => response.text())
-        .then(content => {
-            editor.value = content;
-        })
-        .catch(error => {
-            console.error('Błąd wczytywania przykładu:', error);
-            editor.value = getBasicExample();
-        });
-}
-
-/**
- * Ładuje przykład manipulacji DOM
- */
-function loadDomExample(e) {
-    e.preventDefault();
-    fetch('examples/dom.md')
-        .then(response => response.text())
-        .then(content => {
-            editor.value = content;
-        })
-        .catch(error => {
-            console.error('Błąd wczytywania przykładu:', error);
-            editor.value = getDomExample();
-        });
-}
-
-/**
- * Ładuje przykład operacji na plikach
- */
-function loadFileExample(e) {
-    e.preventDefault();
-    fetch('examples/files.md')
-        .then(response => response.text())
-        .then(content => {
-            editor.value = content;
-        })
-        .catch(error => {
-            console.error('Błąd wczytywania przykładu:', error);
-            editor.value = getFileExample();
-        });
-}
-
-/**
- * Ładuje przykład wizualizacji danych
- */
-function loadVisualizationExample(e) {
-    e.preventDefault();
-    fetch('examples/visualization.md')
-        .then(response => response.text())
-        .then(content => {
-            editor.value = content;
-        })
-        .catch(error => {
-            console.error('Błąd wczytywania przykładu:', error);
-            editor.value = getVisualizationExample();
-        });
-}
-
-/**
- * Ładuje przykład mieszanych języków
- */
-function loadMultiLangExample(e) {
-    e.preventDefault();
-    fetch('examples/multi-lang.md')
-        .then(response => response.text())
-        .then(content => {
-            editor.value = content;
-        })
-        .catch(error => {
-            console.error('Błąd wczytywania przykładu:', error);
-            editor.value = getMultiLangExample();
-        });
-}
+// Ładowanie domyślnego przykładu przy starcie
+window.addEventListener('DOMContentLoaded', () => {
+    loadExampleFile('default-example.md', getDefaultExample);
+});
 
 /**
  * Zawartość domyślnego przykładu
@@ -600,7 +566,7 @@ def calculate_factorial(n):
     return n * calculate_factorial(n - 1)
 
 factorial_5 = calculate_factorial(5)
-print(f"Silnia z 5 wynosi: {factorial_5}")
+print("Silnia z 5 wynosi: " + String(factorial_5))
 
 # Tworzymy element DOM dla wyniku Pythona
 python_block = document.createElement("div")
@@ -609,7 +575,7 @@ python_block.style.padding = "10px"
 python_block.style.borderRadius = "5px"
 python_block.style.marginTop = "10px"
 python_block.style.color = "white"
-python_block.textContent = "Python: " + message + ", 5! = " + factorial_5
+python_block.textContent = "Python: " + message + ", 5! = " + String(factorial_5)
 
 document.body.appendChild(python_block)
 \`\`\`

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.9] - 2025-04-27
+
+### Added
+- Changes in web/examples/default-example.md
+
+### Changed
+- Changes in web/examples/multi-lang.md
+
 ## [0.1.8] - 2025-04-27
 
 ## [0.1.7] - 2025-04-27

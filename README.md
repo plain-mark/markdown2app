@@ -201,6 +201,64 @@ python plainmark.py --repl
 python plainmark.py --example
 ```
 
+
+
+## Web
+
+```bash      
+cd web
+```
+
+
+1. **Użyj portu powyżej 1024** (najlepiej powyżej 8000):
+   ```bash
+   python -m http.server 8080
+   ```
+
+2. **Używaj poprawnej składni** - port podaje się bezpośrednio jako pierwszy argument:
+   ```bash
+   python -m http.server 8888
+   ```
+
+3. **Jeśli port jest zajęty**, możesz:
+   - Użyć innego portu (np. 8001, 8080, 9000)
+   - Zakończyć proces używający danego portu:
+     ```bash
+     # Znajdź proces używający portu 8000
+     sudo lsof -i :8000
+     # albo
+     netstat -tuln | grep 8000
+     
+     # Zakończ proces (zastąp PID numerem procesu)
+     kill PID
+     ```
+
+Spróbuj wykonać:
+```bash
+python -m http.server 8888
+```
+
+A następnie otwórz w przeglądarce adres:
+```
+http://localhost:8888
+```
+
+Jeśli nadal masz problemy z uruchomieniem serwera HTTP, możesz także wypróbować inne rozwiązania:
+
+1. **Użyj innego serwera HTTP**, np. Node.js:
+   ```bash
+   npx serve
+   ```
+
+2. **Użyj PHP (jeśli zainstalowane)**:
+   ```bash
+   php -S localhost:8888
+   ```
+
+3. **Sprawdź, czy masz uprawnienia do zapisu w katalogu**, w którym próbujesz uruchomić serwer.
+
+
+
 ### Aplikacja desktopowa
 
 Instalacja aplikacji desktopowej (bazującej na Electron):

@@ -36,7 +36,7 @@ def calculate_factorial(n):
     return n * calculate_factorial(n - 1)
 
 factorial_5 = calculate_factorial(5)
-print(f"Silnia z 5 wynosi: {factorial_5}")
+print("Silnia z 5 wynosi: " + String(factorial_5))
 
 # Tworzymy element DOM dla wyniku Pythona
 python_block = document.createElement("div")
@@ -45,7 +45,7 @@ python_block.style.padding = "10px"
 python_block.style.borderRadius = "5px"
 python_block.style.marginTop = "10px"
 python_block.style.color = "white"
-python_block.textContent = f"Python: {message}, 5! = {factorial_5}"
+python_block.textContent = "Python: " + message + ", 5! = " + String(factorial_5)
 
 document.body.appendChild(python_block)
 ```
