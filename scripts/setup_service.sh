@@ -1,9 +1,9 @@
 #!/bin/bash
-# Konfiguracja usługi systemd dla movatalk
+# Konfiguracja usługi systemd dla markdown2app
 
 set -e  # Zatrzymanie przy błędzie
 
-echo "===== Konfiguracja usługi systemd dla movatalk ====="
+echo "===== Konfiguracja usługi systemd dla markdown2app ====="
 
 # Sprawdzenie uprawnień
 if [ "$EUID" -ne 0 ]; then
@@ -12,21 +12,21 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Ścieżka do zainstalowanego pakietu
-movatalk_PATH=$(pip3 show movatalk | grep "Location" | awk '{print $2}')
-if [ -z "$movatalk_PATH" ]; then
-  echo "Błąd: Nie znaleziono pakietu movatalk. Czy został zainstalowany?"
+markdown2app_PATH=$(pip3 show markdown2app | grep "Location" | awk '{print $2}')
+if [ -z "$markdown2app_PATH" ]; then
+  echo "Błąd: Nie znaleziono pakietu markdown2app. Czy został zainstalowany?"
   exit 1
 fi
 
 # Utworzenie usługi systemd
 echo "Tworzenie usługi systemd..."
-cat > /etc/systemd/system/movatalk.service << EOF
+cat > /etc/systemd/system/markdown2app.service << EOF
 [Unit]
-Description=movatalk - Bezpieczny interfejs głosowy AI dla dzieci
+Description=markdown2app - Bezpieczny interfejs głosowy AI dla dzieci
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 -m movatalk
+ExecStart=/usr/bin/python3 -m markdown2app
 WorkingDirectory=/home/$SUDO_USER
 StandardOutput=journal
 StandardError=journal
@@ -41,9 +41,9 @@ EOF
 # Aktywacja usługi
 echo "Aktywacja usługi..."
 systemctl daemon-reload
-systemctl enable movatalk.service
+systemctl enable markdown2app.service
 
 echo "===== Konfiguracja usługi zakończona! ====="
-echo "Aby uruchomić usługę: sudo systemctl start movatalk"
-echo "Aby sprawdzić status: sudo systemctl status movatalk"
-echo "Aby zatrzymać usługę: sudo systemctl stop movatalk"
+echo "Aby uruchomić usługę: sudo systemctl start markdown2app"
+echo "Aby sprawdzić status: sudo systemctl status markdown2app"
+echo "Aby zatrzymać usługę: sudo systemctl stop markdown2app"

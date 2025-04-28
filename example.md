@@ -2,7 +2,7 @@
 
 Ten program został specjalnie dostosowany, aby działać z interpreterem Pythona.
 
-```plainmark
+```python plainmark
 # Definicja zmiennych
 name = "Python User"
 age = 30
@@ -42,7 +42,7 @@ python plainmark.py example.md
 
 Poniżej znajduje się bardziej zaawansowany przykład pokazujący instrukcje warunkowe:
 
-```plainmar
+```python plainmar
 # Instrukcje warunkowe w Plainmark (wersja Python)
 temperature = 22
 
@@ -75,7 +75,7 @@ except Exception as e:
 
 ## Obsługa plików
 
-```plainmar
+```python plainmark
 # Obsługa plików
 filename = "testfile.txt"
 

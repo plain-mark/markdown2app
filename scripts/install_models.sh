@@ -1,12 +1,12 @@
 #!/bin/bash
-# Instalacja modeli STT i TTS dla movatalk
+# Instalacja modeli STT i TTS dla markdown2app
 
 set -e  # Zatrzymanie przy błędzie
 
-echo "===== Instalacja modeli STT i TTS dla movatalk ====="
+echo "===== Instalacja modeli STT i TTS dla markdown2app ====="
 
 # Katalog modeli
-MODELS_DIR="$HOME/.movatalk/models"
+MODELS_DIR="$HOME/.markdown2app/models"
 mkdir -p $MODELS_DIR/{stt,tts}
 
 # Pobieranie i kompilacja Whisper.cpp

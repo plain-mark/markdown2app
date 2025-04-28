@@ -1,9 +1,9 @@
 #!/bin/bash
-# Instalacja zależności systemowych dla movatalk
+# Instalacja zależności systemowych dla markdown2app
 
 set -e  # Zatrzymanie przy błędzie
 
-echo "===== Instalacja zależności systemowych dla movatalk ====="
+echo "===== Instalacja zależności systemowych dla markdown2app ====="
 
 # Sprawdzenie uprawnień
 if [ "$EUID" -ne 0 ]; then

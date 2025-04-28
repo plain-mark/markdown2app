@@ -1,6 +1,6 @@
-"""Version information for movatalk package."""
+"""Version information for markdown2app package."""
 
-__version__ = version = "0.1.7"
+__version__ = version = "0.1.8"
 
 def get_version():
     """Return the current package version."""

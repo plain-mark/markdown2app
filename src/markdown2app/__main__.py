@@ -4,8 +4,8 @@ __main__.py
 """
 
 """
-Moduł uruchamiający dla movatalk.
-Pozwala na uruchomienie movatalk jako aplikacji z linii poleceń.
+Moduł uruchamiający dla markdown2app.
+Pozwala na uruchomienie markdown2app jako aplikacji z linii poleceń.
 """
 #!/usr/bin/env python3
 

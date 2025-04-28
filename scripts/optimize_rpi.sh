@@ -1,9 +1,9 @@
 #!/bin/bash
-# Optymalizacja Raspberry Pi dla movatalk
+# Optymalizacja Raspberry Pi dla markdown2app
 
 set -e  # Zatrzymanie przy błędzie
 
-echo "===== Optymalizacja Raspberry Pi dla movatalk ====="
+echo "===== Optymalizacja Raspberry Pi dla markdown2app ====="
 
 # Sprawdzenie uprawnień
 if [ "$EUID" -ne 0 ]; then
@@ -23,9 +23,9 @@ echo "Usługi wyłączone."
 
 # Optymalizacja config.txt
 echo "[2/5] Optymalizacja /boot/config.txt..."
-if ! grep -q "# movatalk optimizations" /boot/config.txt; then
+if ! grep -q "# markdown2app optimizations" /boot/config.txt; then
   echo "" >> /boot/config.txt
-  echo "# movatalk optimizations" >> /boot/config.txt
+  echo "# markdown2app optimizations" >> /boot/config.txt
   echo "gpu_mem=16" >> /boot/config.txt
   echo "dtoverlay=disable-bt" >> /boot/config.txt
   echo "disable_splash=1" >> /boot/config.txt
@@ -39,7 +39,7 @@ fi
 echo "[3/5] Optymalizacja zarządzania pamięcią..."
 if ! grep -q "vm.swappiness" /etc/sysctl.conf; then
   echo "" >> /etc/sysctl.conf
-  echo "# movatalk optimizations" >> /etc/sysctl.conf
+  echo "# markdown2app optimizations" >> /etc/sysctl.conf
   echo "vm.swappiness=10" >> /etc/sysctl.conf
   echo "vm.vfs_cache_pressure=50" >> /etc/sysctl.conf
   echo "Dodano optymalizacje pamięci."

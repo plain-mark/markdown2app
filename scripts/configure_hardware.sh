@@ -1,9 +1,9 @@
 #!/bin/bash
-# Konfiguracja sprzętu dla movatalk
+# Konfiguracja sprzętu dla markdown2app
 
 set -e  # Zatrzymanie przy błędzie
 
-echo "===== Konfiguracja sprzętu dla movatalk ====="
+echo "===== Konfiguracja sprzętu dla markdown2app ====="
 
 # Sprawdzenie uprawnień
 if [ "$EUID" -ne 0 ]; then
